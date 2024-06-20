@@ -1,0 +1,48 @@
+---
+- name: Assert usage of systemd as an init system
+  ansible.builtin.assert:
+    that: ansible_service_mgr == 'systemd'
+    msg: "This role only works with systemd"
+
+- name: Assert that a tibber api token is available
+  ansible.builtin.assert:
+    that:
+      - tibber_exporter_api_token is defined
+      - tibber_exporter_api_token | length > 0
+    msg: "The Tibber Exporter requires an api token"
+
+- name: Install package fact dependencies
+  become: true
+  ansible.builtin.package:
+    name: "{{ _pkg_fact_req }}"
+    state: present
+  when: (_pkg_fact_req)
+  vars:
+    _pkg_fact_req: "{% if (ansible_pkg_mgr == 'apt') %}\
+      {{ ('python-apt' if ansible_python_version is version('3', '<') else 'python3-apt') }}
+      {% else %}\
+      {% endif %}"
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+  when: "not 'packages' in ansible_facts"
+
+- name: Check if tibber_exporter is installed
+  ansible.builtin.stat:
+    path: "{{ tibber_exporter_binary_install_dir }}/tibber_exporter"
+  register: __tibber_exporter_is_installed
+  check_mode: false
+  tags:
+    - tibber_exporter_install
+
+- name: Discover latest version
+  ansible.builtin.set_fact:
+    tibber_exporter_version: "{{ (lookup('url', 'https://api.github.com/repos/{{ _tibber_exporter_repo }}/releases/latest', headers=_github_api_headers,
+                            split_lines=False) | from_json).get('tag_name') | replace('v', '') }}"
+  run_once: true
+  until: tibber_exporter_version is version('0.0.0', '>=')
+  retries: 10
+  when:
+    - tibber_exporter_version == "latest"
+    - tibber_exporter_binary_local_dir | length == 0
+    - not tibber_exporter_skip_install

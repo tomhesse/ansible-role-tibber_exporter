@@ -1,0 +1,13 @@
+---
+tibber_exporter_version: 3.6.4
+tibber_exporter_binary_local_dir: ""
+tibber_exporter_binary_url: "https://github.com/{{ _tibber_exporter_repo }}/releases/download/tibber-exporter-{{ tibber_exporter_version }}/\
+                           tibber-exporter-{{ tibber_exporter_version }}-linux-{{ go_arch }}.tar.gz"
+tibber_exporter_skip_install: false
+
+tibber_exporter_binary_install_dir: "/usr/local/bin"
+tibber_exporter_system_group: "tibber-exp"
+tibber_exporter_system_user: "{{ tibber_exporter_system_group }}"
+
+# Local path to stash the archive and its extraction
+tibber_exporter_archive_path: "/tmp"

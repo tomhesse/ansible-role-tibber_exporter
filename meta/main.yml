@@ -1,0 +1,32 @@
+---
+galaxy_info:
+  role_name: "tibber_exporter"
+  author: "tomhesse"
+  description: "Tibber Exporter"
+  license: "license (BSD, MIT)"
+  min_ansible_version: "2.9"
+  platforms:
+    - name: "Rocky"
+      versions:
+        - "9.0"
+        - "9.1"
+        - "9.2"
+    - name: "Ubuntu"
+      versions:
+        - "focal"
+        - "jammy"
+        - "noble"
+    - name: "Debian"
+      versions:
+        - "buster"
+        - "bullseye"
+        - "bookworm"
+    - name: "Fedora"
+      versions:
+        - '39'
+  galaxy_tags:
+    - "monitoring"
+    - "prometheus"
+    - "exporter"
+    - "metrics"
+    - "system"

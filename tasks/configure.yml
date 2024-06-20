@@ -1,0 +1,19 @@
+---
+- name: Copy the tibber_exporter systemd service file
+  ansible.builtin.template:
+    src: tibber_exporter.service.j2
+    dest: /etc/systemd/system/tibber_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart tibber_exporter
+
+- name: Allow tibber_exporter port in SELinux on RedHat OS family
+  community.general.seport:
+    ports: "8080"
+    proto: tcp
+    setype: http_port_t
+    state: present
+  when:
+    - ansible_version.full is version_compare('2.4', '>=')
+    - ansible_selinux.status == "enabled"

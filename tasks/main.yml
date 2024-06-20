@@ -1,0 +1,59 @@
+---
+- name: Preflight
+  ansible.builtin.include_tasks:
+    file: preflight.yml
+    apply:
+      tags:
+        - tibber_exporter_install
+        - tibber_exporter_configure
+        - tibber_exporter_run
+  tags:
+    - tibber_exporter_install
+    - tibber_exporter_configure
+    - tibber_exporter_run
+
+- name: Install
+  ansible.builtin.include_tasks:
+    file: install.yml
+    apply:
+      become: true
+      tags:
+        - tibber_exporter_install
+  when:
+    ( not __tibber_exporter_is_installed.stat.exists ) or
+    ( tibber_exporter_binary_local_dir | length > 0 )
+  tags:
+    - tibber_exporter_install
+
+- name: SELinux
+  ansible.builtin.include_tasks:
+    file: selinux.yml
+    apply:
+      become: true
+      tags:
+        - tibber_exporter_configure
+  when: ansible_selinux.status == "enabled"
+  tags:
+    - tibber_exporter_configure
+
+- name: Configure
+  ansible.builtin.include_tasks:
+    file: configure.yml
+    apply:
+      become: true
+      tags:
+        - tibber_exporter_configure
+  tags:
+    - tibber_exporter_configure
+
+- name: Ensure Tibber Exporter is enabled on boot
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: tibber_exporter
+    enabled: true
+    state: started
+  when:
+    - not ansible_check_mode
+  tags:
+    - tibber_exporter_run

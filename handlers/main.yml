@@ -1,0 +1,10 @@
+---
+- name: Restart tibber_exporter
+  listen: "restart tibber_exporter"
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: tibber_exporter
+    state: restarted
+  when:
+    - not ansible_check_mode
